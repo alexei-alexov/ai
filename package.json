@@ -1,0 +1,33 @@
+{
+  "name": "ai",
+  "version": "1.0.0",
+  "description": "university project",
+  "main": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexei-alexov/ai.git"
+  },
+  "keywords": [
+    "ai",
+    "opencv",
+    "flask",
+    "bootstrap",
+    "css",
+    "js",
+    "python"
+  ],
+  "author": "Oleksii Lukianchuk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alexei-alexov/ai/issues"
+  },
+  "homepage": "https://github.com/alexei-alexov/ai#readme",
+  "dependencies": {
+    "bootstrap": "^4.1.3",
+    "jquery": "^1.9.1",
+    "popper.js": "^1.14.4"
+  }
+}
