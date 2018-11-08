@@ -4,3 +4,7 @@ textarea.large {
     height: 100%;
     font-family: 'Courier New', Courier, monospace;
 }
+
+#results_list div {
+    cursor: pointer;
+}
