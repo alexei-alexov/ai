@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block title %}TSP{% endblock %}
+{% block content %}
+<div class='container'>
+    <h2>
+        <center>
+            Solving <strong><a href='https://en.wikipedia.org/wiki/Travelling_salesman_problem'>
+            Traveler Salesman Problem</a></strong> using genetic algorithms.
+        </center>
+    </h2>
+    {% if error %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endif %}
+    {% if results %}
+        <div class="row">
+            <div style="width: 100%; height: 600px;" id="mynetwork"></div>
+            <script>
+                var raw_graph = {{ graph_repr }};
+                var winner = {{ winner | string | safe }};
+                var raw_nodes = [];
+                var raw_edges = [];
+                for (let i = 0; i < raw_graph.length; i += 1) {
+                    raw_nodes.push({id: i, label: "" + i});
+                    for(let j = 0; j < i; j += 1) {
+                        let edge = {from: i, to: j, label: '' + raw_graph[i][j]};
+                        let distance = Math.abs(winner.indexOf(i) - winner.indexOf(j));
+                        if (distance == 1 || distance == winner.length - 1) {
+                            edge.color = {color: '#3333ff', highlight: '#3333ff', hover: '#3333ff'};
+                            edge.width = 3;
+                        } else {
+                            edge.color = {color: '#000000', highlight: '#000000', hover: '#000000'};
+                        }
+                        edge.smooth = {
+                            enabled: true,
+                            type: 'dynamic',
+                            roundness: 0.6
+                        };
+                        raw_edges.push(edge);
+                    }
+                }
+
+                var nodes = new vis.DataSet(raw_nodes);
+                var edges = new vis.DataSet(raw_edges);
+                // create a network
+                var container = document.getElementById('mynetwork');
+
+                // provide the data in the vis format
+                var data = {
+                    nodes: nodes,
+                    edges: edges
+                };
+                var options = {
+                    autoResize: true,
+                    height: '100%',
+                    width: '100%',
+                    nodes: {
+                        shape: 'circle',
+                        size: 16
+                    },
+                    physics: {
+                        forceAtlas2Based: {
+                            gravitationalConstant: -26,
+                            centralGravity: 0.005,
+                            springLength: 230,
+                            springConstant: 0.18
+                        },
+                        maxVelocity: 146,
+                        solver: 'forceAtlas2Based',
+                        timestep: 0.35,
+                        stabilization: {iterations: 150}
+                    }
+                };
+                // initialize your network!
+                var network = new vis.Network(container, data, options);
+            </script>
+        </div>
+        <div class="row">
+            Final results:
+            {% for cost, population in results %}
+                <div class="list-group-item list-group-item-action {% if loop.first %}active{% endif %}">Travel cost: {{ cost }}. Path: {{ population | join('→')}} </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <form action="/genetic" method="post" enctype="application/x-www-form-urlencoded">
+        <div class='row'>
+        <div class='col-sm-8'>
+            <label for="config">Matrix: </label>
+            <div>
+                <textarea class='large' type="text" name="graph" id="graph"
+                            placeholder="0 0 0 ... 0 0&#10;0 0 0 ... 0 0&#10;0 0 0 ... 0 0">{% if graph %}{{graph}}{% else %}
+ 0 28 33 30 25 42
+28  0 18 26 33 30
+33 18  0 12 23 12
+30 26 12  0 12 13
+25 33 23 12  0 25
+42 30 12 13 25  0{% endif %}</textarea>
+            </div>
+        </div>
+        <div class='col-sm-4'>
+            <label for="search_config">Config: </label>
+            <div>
+                <textarea class='large' type="text" name="search_config"
+                            id="search_config" placeholder="key: value&#10;key: value&#10;...">{% if search_config %}{{ search_config }}{% else %}
+population: 10
+penalty: 5
+mutation: 3
+rounds: 8{% endif %}</textarea>
+            </div>
+        </div>
+        </div>
+        <input class='btn btn-block btn-primary' type="submit" value="Run">
+    </form>
+</div>
+{% endblock %}
