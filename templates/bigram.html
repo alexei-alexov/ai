@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Bigram.{% endblock %}
+{% block content %}
+<div class="container">
+    <h1><strong>Філософські, моральні та соціальні аспекти використання штучного інтелекту.</strong></h1>
+    {% if error %} <div style="color: red;">{{ error }}</div> {% else %}
+
+    <div id='graph' style='height: 800px'></div>
+    <button data-toggle='collapse' data-target='#original-text'
+            type='button' class='btn btn-secondary btn-block'
+            aria-expanded="false" aria-controls="original-text">Оригінальний текст</button>
+    <div class='collapse' id='original-text'></div>
+    <div>{{ result | safe }}</div>
+    <script>
+        var text = `{{ text | replace('\"', '\\\"') | string | safe }}`;
+        document.getElementById('original-text').innerHTML = text;
+        var data = {{ data | string | safe }};
+        var tokens = {{ tokens | string | safe }};
+        var all_possible_words = {};
+        var raw_nodes = [];
+        var raw_edges = [];
+        for (let i = 0; i < tokens.length; i += 1) {
+            let token = tokens[i];
+            raw_nodes.push({id: token, label: "" + token});
+        }
+        for (var from in data) {
+            if (data.hasOwnProperty(from)) {
+                let from_obj = data[from];
+                for (var to in from_obj) {
+                    if (from_obj.hasOwnProperty(to)) {
+                        raw_edges.push({from: from.toLowerCase(), to: to.toLowerCase(), label: '' + data[from][to] });
+                    }
+                }
+            }
+        }
+        var nodes = new vis.DataSet(raw_nodes);
+        var edges = new vis.DataSet(raw_edges);
+        console.log('nodes: ', nodes);
+        console.log('edges: ', edges);
+        var container = document.getElementById('graph');
+        var data = {
+            nodes: nodes,
+            edges: edges
+        };
+        var options = {
+            autoResize: true,
+            height: '100%',
+            width: '100%',
+            nodes: {
+                shape: 'circle',
+                size: 16
+            },
+            layout: { improvedLayout: false, },
+            nodes: { shape: 'circle', },
+            edges: {
+                width: 0.15,
+                arrows: {to: true},
+                color: {inherit: 'from'},
+                smooth: { type: 'continuous' }
+            },
+            physics: {
+                stabilization: false,
+                barnesHut: {
+                gravitationalConstant: -80000,
+                springConstant: 0.001,
+                springLength: 200
+                }
+            },
+            interaction: {
+                tooltipDelay: 200,
+                hideEdgesOnDrag: true
+            }
+        };
+        var network = new vis.Network(container, data, options);
+    </script>
+
+    {% endif %}
+    <script src="/static/js/bigram.js"></script>
+</div>
+{% endblock %}

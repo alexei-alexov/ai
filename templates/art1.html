@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}Clustering.{% endblock %}
+{% block content %}
+<div class="container">
+    <h1><strong>ART 1</strong></h1>
+    {% if error %} <div style="color: red;">{{ error }}</div> {% else %}
+
+    <div id='graph' style='height: 800px'></div>
+    <button data-toggle='collapse' data-target='#raw-data'
+            type='button' class='btn btn-secondary btn-block'
+            aria-expanded="false" aria-controls="raw-data">Data</button>
+    <div class='collapse row' style='text-align:center;' id='raw-data'></div>
+    <div>{{ result | safe }}</div>
+    <br>
+    <form method="post" action="/art1" class='container' enctype="multipart/form-data">
+        <div>
+            <label for="beta-coefficient">β</label>
+            <input type="number" name="beta" id="beta-coefficient" min="1" step="1"
+                   value='{% if beta %}{{ beta | safe }}{% else %}0.5{% endif %}'>
+        </div>
+        <div>
+            <label for="rho-coefficient">ρ</label>
+            <input type="number" name="rho" id="rho-coefficient" min="0", max="1" step="0.001"
+                   value='{% if rho %}{{ rho | safe }}{% else %}2{% endif %}'>
+        </div>
+        <div class="custom-file">
+            <input type="file" name="csv"
+                   id="csv-input">
+                   <!--accept="text/csv"
+                   class="custom-file-input" -->
+            <!-- <label class="custom-file-label" for="csv-input">Choose file</label> -->
+        </div>
+        <br>
+        <button type="submit" class='btn btn-primary btn-block'>LOAD</button>
+    </form>
+    <script>
+        var data = {{ data | safe }};
+        var raw_data = {{ raw_data | safe }};
+        let raw = document.getElementById('raw-data');
+        for (let i = 0; i < raw_data.length; i += 1) {
+            raw.innerHTML += `<div class='col-sm-4'>${raw_data[i]}</div>`;
+        }
+
+        var raw_nodes = [];
+        var raw_edges = [];
+        var id = 0
+        for (let i = 0; i < data.length; i += 1) {
+            let cluster = data[i];
+            id += 1;
+            let vector_id = id;
+            let vector = cluster.pop();
+            raw_nodes.push({id: vector_id, label: "" + vector, group: i, size: 40});
+            for (let j = 0; j < cluster.length; j += 1) {
+                id += 1;
+                raw_edges.push({from: id, to: vector_id})
+                raw_nodes.push({id: id, label: "" + cluster[j], group: i});
+            }
+            /* for(let j = 0; j < i; j += 1) {
+                let edge = {from: i, to: j, label: '' + raw_graph[i][j]};
+                let distance = Math.abs(winner.indexOf(i) - winner.indexOf(j));
+                if (distance == 1 || distance == winner.length - 1) {
+                    edge.color = {color: '#3333ff', highlight: '#3333ff', hover: '#3333ff'};
+                    edge.width = 3;
+                } else {
+                    edge.color = {color: '#000000', highlight: '#000000', hover: '#000000'};
+                }
+                edge.smooth = {
+                    enabled: true,
+                    type: 'dynamic',
+                    roundness: 0.6
+                };
+                raw_edges.push(edge);
+            } */
+        }
+        // for (var from in data) {
+        //     if (data.hasOwnProperty(from)) {
+        //         let from_obj = data[from];
+        //         for (var to in from_obj) {
+        //             if (from_obj.hasOwnProperty(to)) {
+        //                 raw_edges.push({from: from.toLowerCase(), to: to.toLowerCase(), label: '' + data[from][to] });
+        //             }
+        //         }
+        //     }
+        // }
+
+        var nodes = new vis.DataSet(raw_nodes);
+        var edges = new vis.DataSet(raw_edges);
+        // create a network
+        var container = document.getElementById('graph');
+
+        // provide the data in the vis format
+        var data = {
+            nodes: nodes,
+            edges: edges
+        };
+        var options = {
+            autoResize: false,
+            height: '100%',
+            width: '100%',
+            nodes: {
+                shape: 'dot',
+                size: 10
+            },
+            layout: { improvedLayout: false, },
+            edges: {
+                width: 1,
+                length: 1,
+                color: {inherit: 'from'},
+                smooth: { type: 'continuous' }
+            },
+            physics: {
+                stabilization: false,
+                barnesHut: {
+                gravitationalConstant: -2000,
+                springConstant: 0.001,
+                springLength: 200
+                }
+            },
+            interaction: {
+                tooltipDelay: 200,
+                hideEdgesOnDrag: true
+            }
+        };
+        // initialize your network!
+        var network = new vis.Network(container, data, options);
+    </script>
+
+    {% endif %}
+    <!---<script src="/static/js/bigram.js"></script>-->
+</div>
+{% endblock %}

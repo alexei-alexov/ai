@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}QoS{% endblock %}
+{% block content %}
+<div class="container">
+    <h1>Net bandwidth <strong>
+        <a href="http://docwiki.cisco.com/wiki/Quality_of_Service_Networking">Quality of Service</a></strong></h1>
+
+    <label for="queue">Queue <span id='queue_size'>0 / 1000</span></label>
+    <div class="form-group">
+        <label for="packets_range">Packets per second <span id="packet_label">10</span></label>
+        <script>function packet_change(){document.getElementById('packet_label').innerHTML=this.value;};</script>
+        <input type="range" class="form-control-range" id="packets_range"
+            min="0" max="300" step="1" value="10" onchange="packet_change.bind(this)()" oninput="packet_change.bind(this)()">
+    </div>
+    <div id='graph'></div>
+
+
+
+<script src="/static/js/qos.js"></script>
+</div>
+{% endblock %}
