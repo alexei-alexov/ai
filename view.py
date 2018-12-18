@@ -1,16 +1,41 @@
-from flask import render_template, request
-
 import copy
 import os
-import utils
 import random
-from algorithms.genetic import search, evaluate_config
-from algorithms.bigrams import generate_bigram, get_sentence, tokenize_text
+
+from flask import render_template, request
+
+import utils
+from algorithms.ant import ant as ant_algo
 from algorithms.art1 import ClusterPool, get_cluster_from_csv
+from algorithms.bigrams import generate_bigram, get_sentence, tokenize_text
+from algorithms.genetic import evaluate_config, search
 
 
 def base():
     return render_template('base.html')
+
+
+def ant():
+    context = {}
+    if request.method == 'POST':
+        graph = None
+        if 'graph' in request.form and request.form['graph']:
+            context['graph'] = request.form['graph']
+            graph = utils.parse_matrix(request.form['graph'])
+            context['graph_repr'] = repr(graph)
+        config = None
+        if 'search_config' in request.form and request.form['search_config']:
+            context['search_config'] = request.form['search_config']
+            config = utils.parse_config(copy.deepcopy(request.form['search_config']))
+        paths, costs, smells = ant_algo(graph, config)
+        if paths:
+            context['paths'] = paths
+            context['costs'] = costs
+            context['smells'] = [repr(smell) for smell in smells]
+        else:
+            context['error'] = "Something went wrong."
+
+    return render_template('ant.html', **context)
 
 
 def genetic():
@@ -20,7 +45,7 @@ def genetic():
         if 'graph' in request.form and request.form['graph']:
             context['graph'] = request.form['graph']
             graph = utils.parse_matrix(request.form['graph'])
-            context['graph_repr'] = repr(graph);
+            context['graph_repr'] = repr(graph)
         config = None
         if 'search_config' in request.form and request.form['search_config']:
             context['search_config'] = request.form['search_config']
