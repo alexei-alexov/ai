@@ -20,7 +20,7 @@ CONFIG = {
 def sanitize_config(config):
     for key, sanitizer in CONFIG.items():
         if key in config:
-            config[key] = CONFIG[key]()
+            config[key] = sanitizer(config[key])
 
 def _matrix_max(matrix):
     return max(max(row) for row in matrix)
@@ -52,6 +52,8 @@ def ant(graph, config=None):
     a = config.get('a', 0.85)
     b = config.get('b', round(1 - a, PRECISE))
     p = config.get('p', 0.5)
+    agents = config.get('agents', 5)
+    print("agents: %s" % (agents, ))
 
     def n(r, u):
         return round(1 / graph[r][u], PRECISE)
@@ -123,7 +125,7 @@ def ant(graph, config=None):
     paths = []
     costs = []
     smells = []
-    for agent_id in range(20):
+    for agent_id in range(agents):
         # spawn agent
         path = agent()
         path_pairs = list(zip(path[-1:] + path[:-1], path))
